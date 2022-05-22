@@ -57,11 +57,13 @@ def calcule_angles_incidents(mes_exp,pas,d_focale):
     return angles
 
 def calcul_point_image(forme_lentille,i,j,pas,d_focale):
-    dx = (forme_lentille[i+1+1][j+1]-forme_lentille[i][j+1])/(pas*2)
-    dy = (forme_lentille[i+1][j+1+1]-forme_lentille[i+1][j])/(pas*2)
+    i = i + 1
+    j = j + 1
+    dx = (forme_lentille[i+1][j]-forme_lentille[i-1][j])/(pas*2)
+    dy = (forme_lentille[i][j+1]-forme_lentille[i][j-1])/(pas*2)
     vi = np.array((np.sqrt(1-dx*dx-dy*dy),dx,dy))
     OM = vi * d_focale / vi[0]
-    return OM[1],OM[2]
+    return OM[2],OM[1]
 
 def calcule_points_image(forme_lentille,pas,d_focale):
     return [[calcul_point_image(forme_lentille,i,j,pas,focale_experience) for i in range(len(forme_lentille)-2)] for j in range(len(forme_lentille[0])-2)]
@@ -99,19 +101,22 @@ def calcule_cumulerreur(forme_lentille,mesure,pas,d_focale):
 def optim(forme_lentille,mesure,pas,d_focale):
     r = calcule_cumulerreur(forme_lentille,mesure,pas,d_focale)
     while True:
-        i = random.randrange(0,len(mesure))
-        j = random.randrange(0,len(mesure[0]))
+        i = random.randrange(0,len(mesure)+2)
+        j = random.randrange(0,len(mesure[0])+2)
         v = random.random() - 0.5
-        v = v/10
+        v = v/1000
         forme_lentille[i][j] += v
         rn = calcule_cumulerreur(forme_lentille,mesure,pas,d_focale)
         if rn < r :
             r = rn
             print(r)
-            if (r<1.0):
+            if (r<63):
                 return forme_lentille
         else:
             forme_lentille[i][j] -= v
+    print("*********************************************************")
+    print(forme_lentille,"\n", calcule_points_image(forme_lentille, pas, focale_experience),"\n", mesure_experience)
+    print("*********************************************************")
 
 
 
@@ -122,23 +127,23 @@ def optim(forme_lentille,mesure,pas,d_focale):
 #vi = calcule_vecteurs_incidents(mesure_experience,pas,focale_experience)
 #calcule_polynome(vi)
 #print(calcule_image_deformations(mesure_experience))
-mesure_experience = [[mesure_experience[i][j] for i in range(2)] for j in range(2)]
+#mesure_experience = [[mesure_experience[i][j] for i in range(3)] for j in range(3)]
 forme_lentille = [[0 for i in range(len(mesure_experience[0])+2)] for j in range(len(mesure_experience)+2)]
-#print(optim(forme_lentille,mesure_experience,pas,focale_experience))
+forme_lentille = optim(forme_lentille,mesure_experience,pas,focale_experience)
 
-forme_lentille=[[1, 0,0, 0], [0.0,0, 0,0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
-forme_lentille=[[0, 1,0, 0], [0.0,0, 0,0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
-forme_lentille=[[0, 0,1, 0], [0.0,0, 0,0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
-forme_lentille=[[0, 0,0, 1], [0.0,0, 0,0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
+# forme_lentille=[[0 , 0 , 0 , 0], [1 , 0 , 0, 0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
+# forme_lentille=[[0 , 0 , 0 , 0], [0 , 1 , 0, 0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
+# forme_lentille=[[0 , 0 , 0 , 0], [0 , 0 , 1, 0], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
+# forme_lentille=[[0 , 0 , 0 , 0], [0 , 0 , 0, 1], [0, 0, 0,0],[0,0,0,0]];print(forme_lentille,calcule_points_image(forme_lentille,pas,focale_experience),mesure_experience)
 
-exit(0)
+# exit(0)
 
 fig = plt.figure()
 ax = fig.add_subplot(111,projection='3d')
 fig.show()
-Z = np.array([[np.sqrt(__[0]*__[0]+__[1]*__[1]) for __ in _]  for _ in mesure_experience])
-X = np.linspace(0,1,len(mesure_experience))
-Y = np.linspace(0,1,len(mesure_experience[0]))
+Z = np.array(forme_lentille)
+X = np.linspace(0,1,len(forme_lentille[0]))
+Y = np.linspace(0,1,len(forme_lentille))
 X,Y = np.meshgrid(X,Y)
 ax.plot_surface(X,Y,Z,cmap = cm.coolwarm)
 plt.show()
