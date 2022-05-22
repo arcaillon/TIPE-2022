@@ -2,7 +2,8 @@ from Exp_SH import *
 import numpy as np
 from math import sqrt, atan
 import random
-import copy
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 
 def calcule_vecteur_incident(dx,dy,d_focale):
@@ -65,15 +66,42 @@ def calcul_point_image(forme_lentille,i,j,pas,d_focale):
     OM = vi * d_focale / vi[0]
     return OM[1],OM[2]
 
+
 def calcule_cumulerreur(forme_lentille,mesure,pas,d_focale):
+
+    # try:
+    #     calcule_cumulerreur.surf.remove()
+    # except:
+    #     calcule_cumulerreur.fig = plt.figure()
+    #     calcule_cumulerreur.ax = calcule_cumulerreur.fig.add_subplot(111,projection='3d')
+    #     #calcule_cumulerreur.fig.clear()
+    #     calcule_cumulerreur.fig.show()
+    #     plt.draw()
+    #     plt.ion()
+
     s = 0
+    Y=[]
+    Z=[]
     for i in range(len(mesure)):
+        Y.append(i*pas)
+        X=[]
+        l=[]
         for j in range(len(mesure[0])):
+            X.append(j*pas)
             dx,dy = calcul_point_image(forme_lentille,i,j,pas,d_focale)
             ex = dx - mesure[i][j][0]
             ey = dy - mesure[i][j][1]
             e = np.sqrt(ex*ex+ey*ey)
             s += e
+            l.append(e)
+        Z.append(l)
+    #print(Z,forme_lentille)
+    # X,Y = np.meshgrid(X,Y)
+    # Z = np.array(Z)
+    # calcule_cumulerreur.surf = calcule_cumulerreur.ax.plot_surface(X,Y,Z,cmap = cm.coolwarm)
+    # plt.draw()
+    # plt.show()
+    # calcule_cumulerreur.fig.canvas.draw()
     return s
 
 def optim(forme_lentille,mesure,pas,d_focale):
@@ -82,6 +110,7 @@ def optim(forme_lentille,mesure,pas,d_focale):
         i = random.randrange(0,len(mesure))
         j = random.randrange(0,len(mesure[0]))
         v = random.random() - 0.5
+        v = v/10
         forme_lentille[i][j] += v
         rn = calcule_cumulerreur(forme_lentille,mesure,pas,d_focale)
         if rn < r :
@@ -101,5 +130,16 @@ def optim(forme_lentille,mesure,pas,d_focale):
 #vi = calcule_vecteurs_incidents(mesure_experience,pas,focale_experience)
 #calcule_polynome(vi)
 #print(calcule_image_deformations(mesure_experience))
+mesure_experience = [[mesure_experience[i][j] for i in range(2)] for j in range(2)]
 forme_lentille = [[0 for i in range(len(mesure_experience[0])+1)] for j in range(len(mesure_experience)+1)]
 print(optim(forme_lentille,mesure_experience,pas,focale_experience))
+
+fig = plt.figure()
+ax = fig.add_subplot(111,projection='3d')
+fig.show()
+Z = np.array([[np.sqrt(__[0]*__[0]+__[1]*__[1]) for __ in _]  for _ in mesure_experience])
+X = np.linspace(0,1,13)
+Y = np.linspace(0,1,11)
+X,Y = np.meshgrid(X,Y)
+ax.plot_surface(X,Y,Z,cmap = cm.coolwarm)
+plt.show()
