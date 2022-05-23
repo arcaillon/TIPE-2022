@@ -1,21 +1,9 @@
-#-------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
-#
-# Author:      laffont
-#
-# Created:     21/05/2022
-# Copyright:   (c) laffont 2022
-# Licence:     <your licence>
-#-------------------------------------------------------------------------------
+from Polynomes import *
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3
 
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()
-
-[[-0.024279334654808915,
+t=[[-0.024279334654808915,
   0.004364431532212443,
   -0.005271780558869565,
   0.020876121713619633,
@@ -170,3 +158,29 @@ if __name__ == '__main__':
   0.0,
   0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+n1=len(t[0])
+m1=len(t)
+lx=[i+0.5 for i in range (m1)]
+ly=[j+0.5 for j in range (n1)]
+
+P=interpole2v(lx, ly, t)
+
+def plan (x,y):
+    val=0
+    n=len(P)
+    m=len(P[0])
+    for i in range (n):
+        for j in range (m):
+            val += x**i * y**j * P[i][j]
+    return val
+
+ax = Axes3D(plt.figure())
+plan2=np.vectorize(plan2)
+X = np.arange(0, 5, 0.1)
+Y = np.arange(0, 5, 0.1)
+X, Y = np.meshgrid(X, Y)
+Z = plan2(X, Y)
+Z[0] = 0
+ax.plot_surface(X, Y, Z)
+plt.show()
