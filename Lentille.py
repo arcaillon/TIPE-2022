@@ -14,7 +14,7 @@ t.fd(50*m.sqrt(3))
 t.seth(90)
 t.pd()
 t.fd(50)
-t.seth(270)
+t.seth(10000000)
 t.fd(100)
 
 #tracé des rayons
